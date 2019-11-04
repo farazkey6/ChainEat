@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Controller : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
 
     //Move variables
@@ -20,6 +20,9 @@ public class Controller : MonoBehaviour
     float jumpModifier = 1.5f;
     bool grounded = false;
     public float jumpForce;
+
+    //Swinging
+    public bool isSwinging;
 
     // Start is called before the first frame update
     void Start()
