@@ -21,6 +21,9 @@ public class PlayerController : MonoBehaviour
     bool grounded = false;
     public float jumpForce;
 
+    public GameObject rock;
+    public Transform tempPos;
+
     //Swinging
     public bool isSwinging;
 
@@ -49,6 +52,7 @@ public class PlayerController : MonoBehaviour
         }
 
     }
+
 
     private void FixedUpdate()
     {
