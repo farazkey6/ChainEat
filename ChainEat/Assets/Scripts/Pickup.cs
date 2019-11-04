@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Pickup : MonoBehaviour
 {
-    private float throwForce = 600;
+    public float throwForce = 0.0006f;
     private Vector2 objectPos;
     private float distance;
 
@@ -12,6 +12,7 @@ public class Pickup : MonoBehaviour
     public GameObject item;
     public GameObject tempParent;
     public bool isHolding = false;
+    public bool canPickup = true;
 
     
 
@@ -24,6 +25,10 @@ public class Pickup : MonoBehaviour
             isHolding = false;
         }
 
+        if (tempParent.transform.childCount > 0)
+        {
+            canPickup = false;
+        }
         // Check if isHolding and if true to set the parent of the weapon (Rock)
         if (isHolding == true)
         {
@@ -31,11 +36,13 @@ public class Pickup : MonoBehaviour
             item.transform.SetParent(tempParent.transform);
             item.transform.position = tempParent.transform.position;
 
-            if (Input.GetMouseButtonDown(1))
+            if (isHolding == true)
             {
-                //throw
-                item.GetComponent<Rigidbody2D>().AddForce(tempParent.transform.forward * throwForce);
-                isHolding = false;
+                if (Input.GetKey("e"))
+                {
+                    isHolding = false;
+                }
+
             }
             
         }
@@ -58,22 +65,24 @@ public class Pickup : MonoBehaviour
     // If object is clicked
     void PickupObject()
     {
+
         if (Input.GetKey("e"))
         {
-            // Check if the player is in range of object
-            if (distance <= 1f)
-            {
-                // When picked up
-                if (isHolding == false)
+            
+
+                if (distance <= 1f)
                 {
                     isHolding = true;
+
                     item.GetComponent<Rigidbody2D>().gravityScale = 0;
                     item.GetComponent<Rigidbody2D>().collisionDetectionMode = 0;
-                    
-                }
 
-            }
+                }
+            
         }
+        
+
+        
     }
 
     void Passthrough()
@@ -113,18 +122,11 @@ public class Pickup : MonoBehaviour
         
     }
 
-    private void Aim(Vector3 target)
-    {
-        Vector2 dir = transform.position - target;
-        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle + 90));
-    }
-
     void DropObject()
     {
         if (isHolding == true)
         {
-            if (Input.GetMouseButton(1))
+            if (Input.GetKey("e"))
             {
                 isHolding = false;
             }
