@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     float horizontal_Move = 0f;
     public float moveSpeed;
     public float maxSpeed;
+    int face = 1;
 
     //Collision detection for feet variables
     public CircleCollider2D c_Collider;
@@ -16,8 +17,8 @@ public class PlayerController : MonoBehaviour
 
     //Jump variables
     bool jump = false;
-    float fallModifier = 2f;
-    float jumpModifier = 1.5f;
+    float fallModifier = 3f;
+    float jumpModifier = 2f;
     bool grounded = false;
     public float jumpForce;
 
@@ -26,6 +27,8 @@ public class PlayerController : MonoBehaviour
 
     //Swinging
     public bool isSwinging;
+    public Vector2 hookSwing;
+    public float swingForce;
 
     // Start is called before the first frame update
     void Start()
@@ -104,12 +107,14 @@ public class PlayerController : MonoBehaviour
             Vector3 theScale = transform.localScale;
             theScale.x *= -1;
             transform.localScale = theScale;
+            face *= -1;
         }
 
         if (Mathf.Abs(horizontal_Move) > 0)
         {
             
-            transform.position += movement * Time.fixedDeltaTime;
+            //transform.position += movement * Time.fixedDeltaTime;
+            p_Rigidbody.AddRelativeForce(new Vector2(moveSpeed * face, 0f), ForceMode2D.Impulse);
         }
     }
 
