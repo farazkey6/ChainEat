@@ -114,6 +114,7 @@ GameObject:
   - component: {fileID: 719688852320311960}
   - component: {fileID: 2724769774270806449}
   - component: {fileID: 3853830648303622691}
+  - component: {fileID: 8125306179073680079}
   - component: {fileID: 5759674864639050441}
   - component: {fileID: 866261349922051267}
   - component: {fileID: 5160493152576502790}
@@ -246,12 +247,28 @@ CircleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: -0.9448188}
   serializedVersion: 2
   m_Radius: 0.35498208
+--- !u!58 &8125306179073680079
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5759674864639050440}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: -0.8898934}
+  serializedVersion: 2
+  m_Radius: 0.2904364
 --- !u!114 &5759674864639050441
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -264,12 +281,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee97e4bb19b4be1419b7845d3215a652, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 8
-  maxSpeed: 100
+  moveSpeed: 2
+  maxSpeed: 6
   c_Collider: {fileID: 3853830648303622691}
   p_Rigidbody: {fileID: 719688852320311960}
   jumpForce: 8
   isSwinging: 0
+  hookSwing: {x: 0, y: 0}
+  swingForce: 4
 --- !u!114 &866261349922051267
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -291,6 +310,7 @@ MonoBehaviour:
   chainLayerMask:
     serializedVersion: 2
     m_Bits: 33792
+  chainLength: 10
 --- !u!232 &5160493152576502790
 DistanceJoint2D:
   m_ObjectHideFlags: 0
@@ -352,7 +372,7 @@ LineRenderer:
   - {x: 0, y: 0, z: 1}
   m_Parameters:
     serializedVersion: 3
-    widthMultiplier: 0.08
+    widthMultiplier: 0.05
     widthCurve:
       serializedVersion: 2
       m_Curve:

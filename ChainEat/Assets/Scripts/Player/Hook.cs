@@ -20,10 +20,13 @@ public class Hook : MonoBehaviour
 
     public LineRenderer chainRenderer;
     public LayerMask chainLayerMask; //Which layers the chain reacts to(Must add each in unity)
-    private float chainLength = 20f;
+    public float chainLength;
     private List<Vector2> chainPositions = new List<Vector2>();
-    private bool isInReach;
+    private bool canHook;
 
+    //new positions for sticky hook
+    private Dictionary<Vector2, int> wrapPointsLookup = new Dictionary<Vector2, int>();
+    
     void Awake()
     {
         
@@ -43,28 +46,7 @@ public class Hook : MonoBehaviour
     void Update()
     {
 
-        //Aim with mouse
-        var worldMousePosition =
-        Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0f));
-        var facingDirection = worldMousePosition - transform.position;
-        var aimAngle = Mathf.Atan2(facingDirection.y, facingDirection.x);
-        if (aimAngle < 0f)
-        {
-            aimAngle = Mathf.PI * 2 + aimAngle;
-        }
-        
-        var aimDirection = Quaternion.Euler(0, 0, aimAngle * Mathf.Rad2Deg) * Vector2.right;
-        playerPosition = transform.position;
-
-        if (!isChained)
-        {
-            SetTargetPosition(aimAngle);
-        }
-        else
-        {
-            targetSprite.enabled = false;
-        }
-
+        Vector2 aimDirection = TakeAim();
         HandleInput(aimDirection);
         UpdateHook();
     }
@@ -100,8 +82,8 @@ public class Hook : MonoBehaviour
                 if (!chainPositions.Contains(hit.point))
                 {
 
-                    // Jump slightly to distance the player a little from the ground after grappling to something.
-                    transform.GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, 1f), ForceMode2D.Impulse);
+                    //Jump slightly after successful hook(or not lol)
+                    transform.GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, 0f), ForceMode2D.Impulse);
                     chainPositions.Add(hit.point);
                     playerJoint.distance = Vector2.Distance(playerPosition, hit.point);
                     playerJoint.enabled = true;
@@ -120,6 +102,61 @@ public class Hook : MonoBehaviour
             
             ResetHook();
         }
+    }
+
+    private Vector2 TakeAim()
+    {
+
+        //Aim with mouse
+        var worldMousePosition =
+        Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0f));
+        var facingDirection = worldMousePosition - transform.position;
+        var aimAngle = Mathf.Atan2(facingDirection.y, facingDirection.x);
+        if (aimAngle < 0f)
+        {
+            aimAngle = Mathf.PI * 2 + aimAngle;
+        }
+
+        var aimDirection = Quaternion.Euler(0, 0, aimAngle * Mathf.Rad2Deg) * Vector2.right;
+        playerPosition = transform.position;
+
+        if (!isChained)
+        {
+            SetTargetPosition(aimAngle);
+        }
+        else
+        {
+            targetSprite.enabled = false;
+
+            //Hook sticks to other surfaces after initial connect
+            /*
+            if (chainPositions.Count > 0)
+            {
+                var lastRopePoint = chainPositions.Last();
+                var playerToCurrentNextHit = Physics2D.Raycast(playerPosition, (lastRopePoint - playerPosition).normalized, Vector2.Distance(playerPosition, lastRopePoint) - 0.1f, chainLayerMask);
+                
+                if (playerToCurrentNextHit)
+                {
+                    var colliderWithVertices = playerToCurrentNextHit.collider as PolygonCollider2D;
+                    if (colliderWithVertices != null)
+                    {
+                        var closestPointToHit = GetClosestColliderPointFromRaycastHit(playerToCurrentNextHit, colliderWithVertices);
+                        
+                        if (wrapPointsLookup.ContainsKey(closestPointToHit))
+                        {
+                            ResetHook();
+                        }
+                       
+                        chainPositions.Add(closestPointToHit);
+                        wrapPointsLookup.Add(closestPointToHit, 0);
+                        canHook = false;
+                    }
+                }
+            }
+            */
+        }
+
+        return aimDirection;
     }
 
     private void UpdateHook()
@@ -146,19 +183,19 @@ public class Hook : MonoBehaviour
                     if (chainPositions.Count == 1)
                     {
                         anchorRB.transform.position = tempChainPosition;
-                        if (!isInReach)
+                        if (!canHook)
                         {
                             playerJoint.distance = Vector2.Distance(transform.position, tempChainPosition);
-                            isInReach = true;
+                            canHook = true;
                         }
                     }
                     else
                     {
                         anchorRB.transform.position = tempChainPosition;
-                        if (!isInReach)
+                        if (!canHook)
                         {
                             playerJoint.distance = Vector2.Distance(transform.position, tempChainPosition);
-                            isInReach = true;
+                            canHook = true;
                         }
                     }
                 }
@@ -167,10 +204,10 @@ public class Hook : MonoBehaviour
                 {
                     var tempChainPosition = chainPositions.Last();
                     anchorRB.transform.position = tempChainPosition;
-                    if (!isInReach)
+                    if (!canHook)
                     {
                         playerJoint.distance = Vector2.Distance(transform.position, tempChainPosition);
-                        isInReach = true;
+                        canHook = true;
                     }
                 }
             }
@@ -192,5 +229,17 @@ public class Hook : MonoBehaviour
         chainRenderer.SetPosition(1, transform.position);
         chainPositions.Clear();
         anchorSprite.enabled = false;
+        wrapPointsLookup.Clear();
+    }
+
+    private Vector2 GetClosestColliderPointFromRaycastHit(RaycastHit2D hit, PolygonCollider2D polyCollider)
+    {
+
+        var distanceDictionary = polyCollider.points.ToDictionary<Vector2, float, Vector2>(
+            position => Vector2.Distance(hit.point, polyCollider.transform.TransformPoint(position)),
+            position => polyCollider.transform.TransformPoint(position));
+        
+        var orderedDictionary = distanceDictionary.OrderBy(e => e.Key);
+        return orderedDictionary.Any() ? orderedDictionary.First().Value : Vector2.zero;
     }
 }
