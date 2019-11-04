@@ -13,6 +13,8 @@ public class Pickup : MonoBehaviour
     public GameObject tempParent;
     public bool isHolding = false;
 
+    
+
     // Update is called once per frame
     void Update()
     {
@@ -45,8 +47,11 @@ public class Pickup : MonoBehaviour
             item.GetComponent<Rigidbody2D>().gravityScale = 1;
             item.transform.position = objectPos;
         }
+        Passthrough();
         PickupObject();
         ThrowObject();
+
+        
         
     }
 
@@ -64,11 +69,27 @@ public class Pickup : MonoBehaviour
                     isHolding = true;
                     item.GetComponent<Rigidbody2D>().gravityScale = 0;
                     item.GetComponent<Rigidbody2D>().collisionDetectionMode = 0;
+                    
                 }
 
             }
         }
     }
+
+    void Passthrough()
+    {
+        if (isHolding == true)
+        {
+            item.GetComponent<Collider2D>().isTrigger = true;
+        } else
+        {
+            if (isHolding == false)
+            {
+                item.GetComponent<Collider2D>().isTrigger = false;
+            }
+        }
+    }
+
     void ThrowObject()
     {
         // Chck if the player is holding an object
@@ -77,8 +98,10 @@ public class Pickup : MonoBehaviour
             // Throw with Left Click
             if (Input.GetMouseButton(0))
             {
-                // Add force based on the value of "throwForce"
-                item.GetComponent<Rigidbody2D>().AddForce(Vector2.right * throwForce);
+                Vector3 worldMousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                Vector2 dir = (Vector2)((worldMousePos - transform.position));
+                dir.Normalize();
+                item.GetComponent<Rigidbody2D>().AddForce(dir * throwForce);
                 isHolding = false;
             }
             else
@@ -87,7 +110,16 @@ public class Pickup : MonoBehaviour
                 return;
             }
         }
+        
     }
+
+    private void Aim(Vector3 target)
+    {
+        Vector2 dir = transform.position - target;
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle + 90));
+    }
+
     void DropObject()
     {
         if (isHolding == true)
