@@ -31,6 +31,7 @@ public class NewHook : MonoBehaviour
         playerPosition = transform.position;
         anchorRB = anchorPoint.GetComponent<Rigidbody2D>();
         anchorSprite = anchorPoint.GetComponent<SpriteRenderer>();
+        chainRenderer = playerController.GetComponent<LineRenderer>();
     }
 
     // Start is called before the first frame update
@@ -45,7 +46,7 @@ public class NewHook : MonoBehaviour
 
         Vector2 aimDirection = TakeAim();
         HandleInput(aimDirection);
-        UpdateHook();
+        //UpdateHook();
     }
 
     private void SetTargetPosition(float aimAngle)
@@ -103,7 +104,7 @@ public class NewHook : MonoBehaviour
                         else
                         {
 
-                            chainRenderer.SetPosition(pieceCount, new Vector2(pieceCount * chainPieceSize * aimDirection.x, pieceCount * chainPieceSize * aimDirection.y));
+                            chainRenderer.SetPosition (pieceCount, new Vector2 (transform.position.x + pieceCount * chainPieceSize * aimDirection.x, transform.position.y + pieceCount * chainPieceSize * aimDirection.y));
                         }
                     }
                     anchorSprite.enabled = true;
