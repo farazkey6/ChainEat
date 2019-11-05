@@ -201,7 +201,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1427154985
 GameObject:
@@ -1320,6 +1320,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Distance
       value: 0.005
+      objectReference: {fileID: 0}
+    - target: {fileID: 5972781870548586778, guid: 96ad5a2a347442e4b81c86b7e40e5a8a,
+        type: 3}
+      propertyPath: chainPieceSize
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 96ad5a2a347442e4b81c86b7e40e5a8a, type: 3}

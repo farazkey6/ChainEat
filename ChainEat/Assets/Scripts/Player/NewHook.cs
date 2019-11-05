@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public class Hook : MonoBehaviour
+public class NewHook : MonoBehaviour
 {
-
     public GameObject anchorPoint;
     private Rigidbody2D anchorRB;
     private SpriteRenderer anchorSprite;
@@ -23,13 +22,11 @@ public class Hook : MonoBehaviour
     public float chainLength;
     private List<Vector2> chainPositions = new List<Vector2>();
     private bool canHook;
-
-    //new positions for sticky hook
-    //private Dictionary<Vector2, int> wrapPointsLookup = new Dictionary<Vector2, int>();
+    public float chainPieceSize;
     
     void Awake()
     {
-        
+
         playerJoint.enabled = false;
         playerPosition = transform.position;
         anchorRB = anchorPoint.GetComponent<Rigidbody2D>();
@@ -39,7 +36,7 @@ public class Hook : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
@@ -69,12 +66,12 @@ public class Hook : MonoBehaviour
     {
         if (Input.GetMouseButton(0))
         {
-            
+
             if (isChained) return;
             chainRenderer.enabled = true;
 
             var hit = Physics2D.Raycast(playerPosition, aimDirection, chainLength, chainLayerMask);
-            
+
 
             if (hit.collider != null)
             {
@@ -82,12 +79,35 @@ public class Hook : MonoBehaviour
                 if (!chainPositions.Contains(hit.point))
                 {
 
-                    //Jump slightly after successful hook(or not lol)
-                    transform.GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, 0f), ForceMode2D.Impulse);
+                    //Jump slightly after successful hook(or not lol) then hook
+                    /*
+                    transform.GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, 1f), ForceMode2D.Impulse);
                     chainPositions.Add(hit.point);
                     playerJoint.distance = Vector2.Distance(playerPosition, hit.point);
                     playerJoint.enabled = true;
                     anchorSprite.enabled = true;
+                    */
+                    playerJoint.distance = Vector2.Distance(playerPosition, hit.point);
+                    chainRenderer.positionCount = (int)(playerJoint.distance / chainPieceSize);
+                    for (int pieceCount = 0; pieceCount < chainRenderer.positionCount; pieceCount++)
+                    {
+                        print(pieceCount);
+                        if (pieceCount == 0)
+                        {
+                            
+                        }else if(pieceCount == chainRenderer.positionCount - 1)
+                        {
+
+
+                        }
+                        else
+                        {
+
+                            chainRenderer.SetPosition(pieceCount, new Vector2(pieceCount * chainPieceSize * aimDirection.x, pieceCount * chainPieceSize * aimDirection.y));
+                        }
+                    }
+                    anchorSprite.enabled = true;
+                    playerJoint.enabled = true;
                 }
             }
 
@@ -97,9 +117,10 @@ public class Hook : MonoBehaviour
                 isChained = false;
                 playerJoint.enabled = false;
             }
-        }else if (!Input.GetMouseButton(0))
+        }
+        else if (!Input.GetMouseButton(0))
         {
-            
+
             ResetHook();
         }
     }
@@ -127,33 +148,6 @@ public class Hook : MonoBehaviour
         else
         {
             targetSprite.enabled = false;
-
-            //Hook sticks to other surfaces after initial connect
-            /*
-            if (chainPositions.Count > 0)
-            {
-                var lastRopePoint = chainPositions.Last();
-                var playerToCurrentNextHit = Physics2D.Raycast(playerPosition, (lastRopePoint - playerPosition).normalized, Vector2.Distance(playerPosition, lastRopePoint) - 0.1f, chainLayerMask);
-                
-                if (playerToCurrentNextHit)
-                {
-                    var colliderWithVertices = playerToCurrentNextHit.collider as PolygonCollider2D;
-                    if (colliderWithVertices != null)
-                    {
-                        var closestPointToHit = GetClosestColliderPointFromRaycastHit(playerToCurrentNextHit, colliderWithVertices);
-                        
-                        if (wrapPointsLookup.ContainsKey(closestPointToHit))
-                        {
-                            ResetHook();
-                        }
-                       
-                        chainPositions.Add(closestPointToHit);
-                        wrapPointsLookup.Add(closestPointToHit, 0);
-                        canHook = false;
-                    }
-                }
-            }
-            */
         }
 
         return aimDirection;
@@ -166,10 +160,10 @@ public class Hook : MonoBehaviour
         {
             return;
         }
-        
+
         //find the correct position
         chainRenderer.positionCount = chainPositions.Count + 1;
-        
+
         for (var i = chainRenderer.positionCount - 1; i >= 0; i--)
         {
             if (i != chainRenderer.positionCount - 1)
@@ -229,17 +223,5 @@ public class Hook : MonoBehaviour
         chainRenderer.SetPosition(1, transform.position);
         chainPositions.Clear();
         anchorSprite.enabled = false;
-        //wrapPointsLookup.Clear();
-    }
-
-    private Vector2 GetClosestColliderPointFromRaycastHit(RaycastHit2D hit, PolygonCollider2D polyCollider)
-    {
-
-        var distanceDictionary = polyCollider.points.ToDictionary<Vector2, float, Vector2>(
-            position => Vector2.Distance(hit.point, polyCollider.transform.TransformPoint(position)),
-            position => polyCollider.transform.TransformPoint(position));
-        
-        var orderedDictionary = distanceDictionary.OrderBy(e => e.Key);
-        return orderedDictionary.Any() ? orderedDictionary.First().Value : Vector2.zero;
     }
 }

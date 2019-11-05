@@ -117,6 +117,7 @@ GameObject:
   - component: {fileID: 6134576277972277632}
   - component: {fileID: 6134576277972277633}
   - component: {fileID: 6134576277972277634}
+  - component: {fileID: 5972781870548586778}
   - component: {fileID: 6134576277972277635}
   - component: {fileID: 6134576277972277660}
   m_Layer: 0
@@ -298,7 +299,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6134576277972277661}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01178d907bc1b374b9b44aaa13eabd53, type: 3}
   m_Name: 
@@ -313,6 +314,29 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 33792
   chainLength: 10
+--- !u!114 &5972781870548586778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6134576277972277661}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75afaaa01358b0642a42a2a11b62f4ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  anchorPoint: {fileID: 6134576276582797992}
+  playerJoint: {fileID: 6134576277972277635}
+  playerController: {fileID: 6134576277972277633}
+  target: {fileID: 6134576278260082268}
+  targetSprite: {fileID: 6134576278260082269}
+  chainRenderer: {fileID: 6134576277972277660}
+  chainLayerMask:
+    serializedVersion: 2
+    m_Bits: 33792
+  chainLength: 10
+  chainPieceSize: 0.2
 --- !u!232 &6134576277972277635
 DistanceJoint2D:
   m_ObjectHideFlags: 0
