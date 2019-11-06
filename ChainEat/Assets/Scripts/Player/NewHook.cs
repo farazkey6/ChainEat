@@ -22,7 +22,7 @@ public class NewHook : MonoBehaviour
     public float chainLength;
     private List<Vector2> chainPositions = new List<Vector2>();
     private bool canHook;
-    public float chainPieceSize;
+    private float chainPieceSize;
     public HingeJoint2D jointAnchor;
     private HingeJoint2D[] chainJoints;
     
@@ -91,16 +91,18 @@ public class NewHook : MonoBehaviour
                     anchorSprite.enabled = true;
                     */
                     playerJoint.distance = Vector2.Distance(playerPosition, hit.point);
+                    var trueSize = GetComponent<AutoChain>().GetTrueSize();
+                    chainPieceSize = trueSize;
+                    int chainKnots = (int) (playerJoint.distance / chainPieceSize);
+                    Vector2 basePos = new Vector2(transform.position.x + chainPieceSize * aimDirection.x, transform.position.y + chainPieceSize * aimDirection.y);
                     //chainRenderer.positionCount = (int)(playerJoint.distance / chainPieceSize);
-                    chainJoints = new HingeJoint2D[(int)(playerJoint.distance / chainPieceSize)];
-                    for (int pieceCount = 0; pieceCount < chainJoints.Length; pieceCount++)
-                    {
+                    //chainJoints = new HingeJoint2D[(int)(playerJoint.distance / chainPieceSize)];
+                    //for (int pieceCount = 0; pieceCount < chainKnots; pieceCount++)
+                    //{
                         //print(pieceCount + " " + playerJoint.distance);
-                        Vector2 tempPosition = new Vector2(transform.position.x + pieceCount * chainPieceSize * aimDirection.x, transform.position.y + pieceCount * chainPieceSize * aimDirection.y);
-                        print(chainJoints[pieceCount].transform);
-                        chainJoints[pieceCount].transform.Translate(tempPosition);
-                        //GameObject chainak = Instantiate(ChainObject);
-
+                        //print(chainJoints[pieceCount].transform);
+                        //chainJoints[pieceCount].transform.Translate(tempPosition);
+                        /*
                         if (pieceCount == 0)
                         {
 
@@ -117,8 +119,9 @@ public class NewHook : MonoBehaviour
                             chainJoints[pieceCount].connectedBody = chainJoints[pieceCount - 1].GetComponent<Rigidbody2D>();
                             //chainRenderer.SetPosition (pieceCount, new Vector2 (transform.position.x + pieceCount * chainPieceSize * aimDirection.x, transform.position.y + pieceCount * chainPieceSize * aimDirection.y));
                         }
-                    }
-                    anchorSprite.enabled = true;
+                        */
+                        //}
+                        anchorSprite.enabled = true;
                     playerJoint.enabled = true;
                 }
             }

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ChainObject : MonoBehaviour
+public class AutoChain : MonoBehaviour
 {
-
     public GameObject chainPrefab;
 
     private ChainObject co;
@@ -12,8 +11,9 @@ public class ChainObject : MonoBehaviour
     private HingeJoint2D hj;
     private Transform tr;
     private SpriteRenderer sr;
-    private int numberID;
     private int knots;
+    private Vector3 pos;
+    private Rigidbody2D hook;
 
     private void Awake()
     {
@@ -24,12 +24,7 @@ public class ChainObject : MonoBehaviour
         sr = GetComponent<SpriteRenderer>();
         co = GetComponent<ChainObject>();
     }
-
-    private void Start()
-    {
-        
-    }
-
+    
     protected void BootUp()
     {
 
@@ -38,10 +33,31 @@ public class ChainObject : MonoBehaviour
 
             knots--;
             var child = Instantiate(chainPrefab, tr);
-            child.GetComponent<ChainObject>().SetKnot(knots);
+            child.GetComponent<Rigidbody2D>().gravityScale = 0f;
+            child.GetComponent<AutoChain>().SetPos(pos);
+            child.GetComponent<AutoChain>().SetKnot(knots);
+            child.GetComponent<AutoChain>().PassHook(hook);
             child.GetComponent<HingeJoint2D>().connectedBody = rb;
+            child.GetComponent<Transform>().transform.position = tr.position + new Vector3 (pos.x, pos.y, 0);
+            child.GetComponent<AutoChain>().BootUp();
+        }else if (knots == 0)
+        {
 
+            FixedJoint2D joint = gameObject.AddComponent<FixedJoint2D>();
+            joint.connectedBody = hook;
         }
+    }
+
+    public float GetTrueSize()
+    {
+
+        return sr.size.x;
+    }
+
+    protected void PassHook(Rigidbody2D newHook)
+    {
+
+        hook = newHook;
     }
 
     protected void SetKnot(int iterationsLeft)
@@ -50,31 +66,13 @@ public class ChainObject : MonoBehaviour
         knots = iterationsLeft;
     }
 
-    protected void SetID(int number)
+    protected void SetPos (Vector3 newPos)
     {
 
-        numberID = number;
+        pos = newPos;
     }
 
-    protected int GetID()
-    {
-
-        return numberID;
-    }
-
-    protected void SetTransform(Vector2 newPosition)
-    {
-
-        tr.transform.Translate(newPosition);
-    }
-
-    protected void ConnectBody(Rigidbody2D anchor)
-    {
-
-        hj.connectedBody = anchor;
-    }
-
-    protected void kill()
+    protected void Kill()
     {
         foreach (Transform child in transform)
         {
