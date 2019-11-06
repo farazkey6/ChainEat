@@ -6,7 +6,7 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour
 {
 
-    public float knockbackForce = 1000000;
+    public float knockbackForce;
 
     public Text enemyHealth;
     private int enemyHealthCounter = 2;
@@ -30,7 +30,7 @@ public class EnemyController : MonoBehaviour
         if (col.collider.tag == "Rock")
         {
             //Debug.Log(knockbackForce);
-            //gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up + Vector2.right * knockbackForce);
+            gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * knockbackForce);
             enemyHealthCounter--;
 
         }
