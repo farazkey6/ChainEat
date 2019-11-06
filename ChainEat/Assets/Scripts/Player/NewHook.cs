@@ -17,12 +17,14 @@ public class NewHook : MonoBehaviour
     public Transform target;
     public SpriteRenderer targetSprite;
 
-    public LineRenderer chainRenderer;
+    //public LineRenderer chainRenderer;
     public LayerMask chainLayerMask; //Which layers the chain reacts to(Must add each in unity)
     public float chainLength;
     private List<Vector2> chainPositions = new List<Vector2>();
     private bool canHook;
     public float chainPieceSize;
+    public HingeJoint2D jointAnchor;
+    private HingeJoint2D[] chainJoints;
     
     void Awake()
     {
@@ -31,7 +33,7 @@ public class NewHook : MonoBehaviour
         playerPosition = transform.position;
         anchorRB = anchorPoint.GetComponent<Rigidbody2D>();
         anchorSprite = anchorPoint.GetComponent<SpriteRenderer>();
-        chainRenderer = playerController.GetComponent<LineRenderer>();
+        //chainRenderer = playerController.GetComponent<LineRenderer>();
     }
 
     // Start is called before the first frame update
@@ -69,7 +71,7 @@ public class NewHook : MonoBehaviour
         {
 
             if (isChained) return;
-            chainRenderer.enabled = true;
+            //chainRenderer.enabled = true;
 
             var hit = Physics2D.Raycast(playerPosition, aimDirection, chainLength, chainLayerMask);
 
@@ -89,22 +91,31 @@ public class NewHook : MonoBehaviour
                     anchorSprite.enabled = true;
                     */
                     playerJoint.distance = Vector2.Distance(playerPosition, hit.point);
-                    chainRenderer.positionCount = (int)(playerJoint.distance / chainPieceSize);
-                    for (int pieceCount = 0; pieceCount < chainRenderer.positionCount; pieceCount++)
+                    //chainRenderer.positionCount = (int)(playerJoint.distance / chainPieceSize);
+                    chainJoints = new HingeJoint2D[(int)(playerJoint.distance / chainPieceSize)];
+                    for (int pieceCount = 0; pieceCount < chainJoints.Length; pieceCount++)
                     {
-                        print(pieceCount);
+                        //print(pieceCount + " " + playerJoint.distance);
+                        Vector2 tempPosition = new Vector2(transform.position.x + pieceCount * chainPieceSize * aimDirection.x, transform.position.y + pieceCount * chainPieceSize * aimDirection.y);
+                        print(chainJoints[pieceCount].transform);
+                        chainJoints[pieceCount].transform.Translate(tempPosition);
+                        //GameObject chainak = Instantiate(ChainObject);
+
                         if (pieceCount == 0)
                         {
-                            
-                        }else if(pieceCount == chainRenderer.positionCount - 1)
+
+                            chainJoints[pieceCount].connectedBody = jointAnchor.GetComponent<Rigidbody2D>();
+                        }else if(pieceCount == chainJoints.Length - 1)
                         {
 
-
+                            chainJoints[pieceCount].connectedBody = hit.rigidbody;
+                            chainJoints[pieceCount].connectedBody = chainJoints[pieceCount - 1].GetComponent<Rigidbody2D>();
                         }
                         else
                         {
 
-                            chainRenderer.SetPosition (pieceCount, new Vector2 (transform.position.x + pieceCount * chainPieceSize * aimDirection.x, transform.position.y + pieceCount * chainPieceSize * aimDirection.y));
+                            chainJoints[pieceCount].connectedBody = chainJoints[pieceCount - 1].GetComponent<Rigidbody2D>();
+                            //chainRenderer.SetPosition (pieceCount, new Vector2 (transform.position.x + pieceCount * chainPieceSize * aimDirection.x, transform.position.y + pieceCount * chainPieceSize * aimDirection.y));
                         }
                     }
                     anchorSprite.enabled = true;
@@ -114,7 +125,7 @@ public class NewHook : MonoBehaviour
 
             else
             {
-                chainRenderer.enabled = false;
+                //chainRenderer.enabled = false;
                 isChained = false;
                 playerJoint.enabled = false;
             }
@@ -122,7 +133,7 @@ public class NewHook : MonoBehaviour
         else if (!Input.GetMouseButton(0))
         {
 
-            ResetHook();
+            //ResetHook();
         }
     }
 
@@ -153,7 +164,7 @@ public class NewHook : MonoBehaviour
 
         return aimDirection;
     }
-
+    /*
     private void UpdateHook()
     {
         //return if nothing connects
@@ -225,4 +236,5 @@ public class NewHook : MonoBehaviour
         chainPositions.Clear();
         anchorSprite.enabled = false;
     }
+    */
 }
