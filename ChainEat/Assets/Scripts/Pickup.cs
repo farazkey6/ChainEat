@@ -26,9 +26,11 @@ public class Pickup : MonoBehaviour
         // Check if isHolding and if true to set the parent of the weapon (Rock)
         if (isHolding == true)
         {
+            
             item.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
             item.transform.SetParent(tempParent.transform);
-            item.transform.position = tempParent.transform.position; 
+            item.transform.position = tempParent.transform.position;
+            
         }
         else
         {
@@ -41,6 +43,7 @@ public class Pickup : MonoBehaviour
         Passthrough();
         PickupObject();
         ThrowObject();
+        
 
         
         
