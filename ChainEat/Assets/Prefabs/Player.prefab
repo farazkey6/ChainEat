@@ -139,6 +139,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69ae02d0638a2044bbe469a8caae3243, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chainPrefab: {fileID: 0}
 --- !u!1 &6134576276582797992
 GameObject:
   m_ObjectHideFlags: 0
@@ -492,6 +493,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   anchorPoint: {fileID: 6134576276582797992}
+  chainPrefab: {fileID: 8965748028620494927, guid: aac9b3bb82686954fa2713b0386df9e7,
+    type: 3}
   playerJoint: {fileID: 6134576277972277635}
   playerController: {fileID: 6134576277972277633}
   target: {fileID: 6134576278260082268}
@@ -500,7 +503,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 33792
   chainLength: 10
-  chainPieceSize: 0.2
   jointAnchor: {fileID: 4717065537122504850}
 --- !u!232 &6134576277972277635
 DistanceJoint2D:

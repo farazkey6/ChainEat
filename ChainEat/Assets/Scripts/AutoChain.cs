@@ -12,7 +12,7 @@ public class AutoChain : MonoBehaviour
     private Transform tr;
     private SpriteRenderer sr;
     private int knots;
-    private Vector3 pos;
+    private Vector3 offsetPosition;
     private Rigidbody2D hook;
 
     private void Awake()
@@ -24,21 +24,22 @@ public class AutoChain : MonoBehaviour
         sr = GetComponent<SpriteRenderer>();
         co = GetComponent<ChainObject>();
     }
-    
-    protected void BootUp()
+
+    public void BootUp()
     {
 
         if (knots > 0)
         {
-
+            print(knots + " knots");
             knots--;
             var child = Instantiate(chainPrefab, tr);
             child.GetComponent<Rigidbody2D>().gravityScale = 0f;
-            child.GetComponent<AutoChain>().SetPos(pos);
+            child.GetComponent<AutoChain>().SetOffset(offsetPosition);
             child.GetComponent<AutoChain>().SetKnot(knots);
             child.GetComponent<AutoChain>().PassHook(hook);
             child.GetComponent<HingeJoint2D>().connectedBody = rb;
-            child.GetComponent<Transform>().transform.position = tr.position + new Vector3 (pos.x, pos.y, 0);
+            child.GetComponent<SpriteRenderer>().enabled = true;
+            child.GetComponent<Transform>().transform.position = tr.position + offsetPosition;
             child.GetComponent<AutoChain>().BootUp();
         }else if (knots == 0)
         {
@@ -54,22 +55,22 @@ public class AutoChain : MonoBehaviour
         return sr.size.x;
     }
 
-    protected void PassHook(Rigidbody2D newHook)
+    public void PassHook(Rigidbody2D newHook)
     {
 
         hook = newHook;
     }
 
-    protected void SetKnot(int iterationsLeft)
+    public void SetKnot(int iterationsLeft)
     {
 
         knots = iterationsLeft;
     }
 
-    protected void SetPos (Vector3 newPos)
+    public void SetOffset (Vector3 offset)
     {
 
-        pos = newPos;
+        offsetPosition = offset;
     }
 
     protected void Kill()
@@ -79,6 +80,6 @@ public class AutoChain : MonoBehaviour
 
             Destroy(child.gameObject);
         }
-        Destroy(this);
+        //Destroy(this);
     }
 }

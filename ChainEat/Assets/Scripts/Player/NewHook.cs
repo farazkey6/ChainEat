@@ -83,21 +83,23 @@ public class NewHook : MonoBehaviour
                 {
                     
                     playerJoint.distance = Vector2.Distance(playerPosition, hit.point);
-                    var chainHandle = Instantiate(chainPrefab, this.GetComponent<Transform>());
+                    var chainHandle = Instantiate(chainPrefab);
                     chainHandle.GetComponent<Rigidbody2D>().gravityScale = 0f;
-                    var trueSize = GetComponent<AutoChain>().GetTrueSize();
+                    var trueSize = chainHandle.GetComponent<AutoChain>().GetTrueSize();
                     chainPieceSize = trueSize;
+                    chainPieceSize = 0.1f;
                     int chainKnots = (int)(playerJoint.distance / chainPieceSize);
-                    Vector3 basePos = new Vector3(transform.position.x + chainPieceSize * aimDirection.x, transform.position.y + chainPieceSize * aimDirection.y, 0);
-                    chainHandle.GetComponent<AutoChain>().SetPos(basePos);
+                    Vector3 offsetPos = new Vector3(chainPieceSize * aimDirection.x, chainPieceSize * aimDirection.y, 0);
+                    chainHandle.GetComponent<AutoChain>().SetOffset(offsetPos);
                     chainHandle.GetComponent<AutoChain>().SetKnot(chainKnots);
                     chainHandle.GetComponent<AutoChain>().PassHook(hit.rigidbody);
                     chainHandle.GetComponent<HingeJoint2D>().connectedBody = anchorRB;
-                    chainHandle.GetComponent<Transform>().transform.position = GetComponent<Transform>().position + basePos;
+                    chainHandle.GetComponent<Transform>().transform.position = GetComponent<Transform>().position + offsetPos;
                     chainHandle.GetComponent<AutoChain>().BootUp();
                      
                     anchorSprite.enabled = true;
                     playerJoint.enabled = true;
+                    print(offsetPos + "/" + transform.position);
                 }
             }
 
@@ -111,6 +113,7 @@ public class NewHook : MonoBehaviour
         else if (!Input.GetMouseButton(0))
         {
 
+            playerJoint.enabled = false;
             //ResetHook();
         }
     }
