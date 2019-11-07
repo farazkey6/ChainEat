@@ -6,6 +6,7 @@ using System.Linq;
 public class NewHook : MonoBehaviour
 {
     public GameObject anchorPoint;
+    public GameObject chainPrefab;
     private Rigidbody2D anchorRB;
     private SpriteRenderer anchorSprite;
 
@@ -48,7 +49,7 @@ public class NewHook : MonoBehaviour
 
         Vector2 aimDirection = TakeAim();
         HandleInput(aimDirection);
-        //UpdateHook();
+        //UpdateChain();
     }
 
     private void SetTargetPosition(float aimAngle)
@@ -71,7 +72,6 @@ public class NewHook : MonoBehaviour
         {
 
             if (isChained) return;
-            //chainRenderer.enabled = true;
 
             var hit = Physics2D.Raycast(playerPosition, aimDirection, chainLength, chainLayerMask);
 
@@ -81,54 +81,29 @@ public class NewHook : MonoBehaviour
                 isChained = true;
                 if (!chainPositions.Contains(hit.point))
                 {
-
-                    //Jump slightly after successful hook(or not lol) then hook
-                    /*
-                    transform.GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, 1f), ForceMode2D.Impulse);
-                    chainPositions.Add(hit.point);
+                    
                     playerJoint.distance = Vector2.Distance(playerPosition, hit.point);
-                    playerJoint.enabled = true;
-                    anchorSprite.enabled = true;
-                    */
-                    playerJoint.distance = Vector2.Distance(playerPosition, hit.point);
+                    var chainHandle = Instantiate(chainPrefab, this.GetComponent<Transform>());
+                    chainHandle.GetComponent<Rigidbody2D>().gravityScale = 0f;
                     var trueSize = GetComponent<AutoChain>().GetTrueSize();
                     chainPieceSize = trueSize;
-                    int chainKnots = (int) (playerJoint.distance / chainPieceSize);
-                    Vector2 basePos = new Vector2(transform.position.x + chainPieceSize * aimDirection.x, transform.position.y + chainPieceSize * aimDirection.y);
-                    //chainRenderer.positionCount = (int)(playerJoint.distance / chainPieceSize);
-                    //chainJoints = new HingeJoint2D[(int)(playerJoint.distance / chainPieceSize)];
-                    //for (int pieceCount = 0; pieceCount < chainKnots; pieceCount++)
-                    //{
-                        //print(pieceCount + " " + playerJoint.distance);
-                        //print(chainJoints[pieceCount].transform);
-                        //chainJoints[pieceCount].transform.Translate(tempPosition);
-                        /*
-                        if (pieceCount == 0)
-                        {
-
-                            chainJoints[pieceCount].connectedBody = jointAnchor.GetComponent<Rigidbody2D>();
-                        }else if(pieceCount == chainJoints.Length - 1)
-                        {
-
-                            chainJoints[pieceCount].connectedBody = hit.rigidbody;
-                            chainJoints[pieceCount].connectedBody = chainJoints[pieceCount - 1].GetComponent<Rigidbody2D>();
-                        }
-                        else
-                        {
-
-                            chainJoints[pieceCount].connectedBody = chainJoints[pieceCount - 1].GetComponent<Rigidbody2D>();
-                            //chainRenderer.SetPosition (pieceCount, new Vector2 (transform.position.x + pieceCount * chainPieceSize * aimDirection.x, transform.position.y + pieceCount * chainPieceSize * aimDirection.y));
-                        }
-                        */
-                        //}
-                        anchorSprite.enabled = true;
+                    int chainKnots = (int)(playerJoint.distance / chainPieceSize);
+                    Vector3 basePos = new Vector3(transform.position.x + chainPieceSize * aimDirection.x, transform.position.y + chainPieceSize * aimDirection.y, 0);
+                    chainHandle.GetComponent<AutoChain>().SetPos(basePos);
+                    chainHandle.GetComponent<AutoChain>().SetKnot(chainKnots);
+                    chainHandle.GetComponent<AutoChain>().PassHook(hit.rigidbody);
+                    chainHandle.GetComponent<HingeJoint2D>().connectedBody = anchorRB;
+                    chainHandle.GetComponent<Transform>().transform.position = GetComponent<Transform>().position + basePos;
+                    chainHandle.GetComponent<AutoChain>().BootUp();
+                     
+                    anchorSprite.enabled = true;
                     playerJoint.enabled = true;
                 }
             }
 
             else
             {
-                //chainRenderer.enabled = false;
+                
                 isChained = false;
                 playerJoint.enabled = false;
             }
@@ -167,77 +142,4 @@ public class NewHook : MonoBehaviour
 
         return aimDirection;
     }
-    /*
-    private void UpdateHook()
-    {
-        //return if nothing connects
-        if (!isChained)
-        {
-            return;
-        }
-
-        //find the correct position
-        chainRenderer.positionCount = chainPositions.Count + 1;
-
-        for (var i = chainRenderer.positionCount - 1; i >= 0; i--)
-        {
-            if (i != chainRenderer.positionCount - 1)
-            {
-                chainRenderer.SetPosition(i, chainPositions[i]);
-
-                //set anchor
-                if (i == chainPositions.Count - 1 || chainPositions.Count == 1)
-                {
-                    var tempChainPosition = chainPositions[chainPositions.Count - 1];
-                    if (chainPositions.Count == 1)
-                    {
-                        anchorRB.transform.position = tempChainPosition;
-                        if (!canHook)
-                        {
-                            playerJoint.distance = Vector2.Distance(transform.position, tempChainPosition);
-                            canHook = true;
-                        }
-                    }
-                    else
-                    {
-                        anchorRB.transform.position = tempChainPosition;
-                        if (!canHook)
-                        {
-                            playerJoint.distance = Vector2.Distance(transform.position, tempChainPosition);
-                            canHook = true;
-                        }
-                    }
-                }
-                // fixes some strange behaviours
-                else if (i - 1 == chainPositions.IndexOf(chainPositions.Last()))
-                {
-                    var tempChainPosition = chainPositions.Last();
-                    anchorRB.transform.position = tempChainPosition;
-                    if (!canHook)
-                    {
-                        playerJoint.distance = Vector2.Distance(transform.position, tempChainPosition);
-                        canHook = true;
-                    }
-                }
-            }
-            else
-            {
-                // yay
-                chainRenderer.SetPosition(i, transform.position);
-            }
-        }
-    }
-
-    private void ResetHook()
-    {
-        playerJoint.enabled = false;
-        isChained = false;
-        playerController.isSwinging = false;
-        chainRenderer.positionCount = 2;
-        chainRenderer.SetPosition(0, transform.position);
-        chainRenderer.SetPosition(1, transform.position);
-        chainPositions.Clear();
-        anchorSprite.enabled = false;
-    }
-    */
 }
