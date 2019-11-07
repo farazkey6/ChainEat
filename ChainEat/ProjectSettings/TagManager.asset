@@ -7,6 +7,8 @@ TagManager:
   - Rock
   - Enemy
   - Stick
+  - Leg
+  - Ground
   layers:
   - Default
   - TransparentFX
