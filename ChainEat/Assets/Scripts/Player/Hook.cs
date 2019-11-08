@@ -10,7 +10,7 @@ public class Hook : MonoBehaviour
     private Rigidbody2D anchorRB;
     private SpriteRenderer anchorSprite;
 
-    public DistanceJoint2D playerJoint;
+    public SpringJoint2D playerJoint;
     public PlayerController playerController;
     private Vector2 playerPosition;
     private bool isChained;
@@ -25,12 +25,14 @@ public class Hook : MonoBehaviour
     private bool canHook;
 
     //new positions for sticky hook
-    private Dictionary<Vector2, int> wrapPointsLookup = new Dictionary<Vector2, int>();
+    //private Dictionary<Vector2, int> wrapPointsLookup = new Dictionary<Vector2, int>();
     
     void Awake()
     {
         
         playerJoint.enabled = false;
+        playerJoint.frequency = 1;
+        playerJoint.dampingRatio = 0.005f;
         playerPosition = transform.position;
         anchorRB = anchorPoint.GetComponent<Rigidbody2D>();
         anchorSprite = anchorPoint.GetComponent<SpriteRenderer>();
@@ -166,7 +168,9 @@ public class Hook : MonoBehaviour
         {
             return;
         }
-        
+
+        playerJoint.distance *= 0.99f;
+
         //find the correct position
         chainRenderer.positionCount = chainPositions.Count + 1;
         
@@ -229,7 +233,7 @@ public class Hook : MonoBehaviour
         chainRenderer.SetPosition(1, transform.position);
         chainPositions.Clear();
         anchorSprite.enabled = false;
-        wrapPointsLookup.Clear();
+        //wrapPointsLookup.Clear();
     }
 
     private Vector2 GetClosestColliderPointFromRaycastHit(RaycastHit2D hit, PolygonCollider2D polyCollider)

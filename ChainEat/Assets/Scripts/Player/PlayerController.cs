@@ -25,7 +25,7 @@ public class PlayerController : MonoBehaviour
     public GameObject rock;
     public Transform tempPos;
 
-    //Swinging
+    //Improved swinging (currently unused)
     public bool isSwinging;
     public Vector2 hookSwing;
     public float swingForce;
