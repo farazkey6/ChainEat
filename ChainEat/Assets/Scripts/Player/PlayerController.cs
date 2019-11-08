@@ -30,10 +30,15 @@ public class PlayerController : MonoBehaviour
     public Vector2 hookSwing;
     public float swingForce;
 
+    //Stats
+    int maxHealth = 2;
+    int currentHealth;
+
+
     // Start is called before the first frame update
     void Start()
     {
-
+        this.currentHealth = this.maxHealth;
     }
 
     // Update is called once per frame
@@ -132,5 +137,17 @@ public class PlayerController : MonoBehaviour
     {
 
         grounded = true;
+    }
+
+    private void Die() {}
+
+    public void TakeDamage(int amount)
+    {
+        currentHealth -= amount;
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
     }
 }
