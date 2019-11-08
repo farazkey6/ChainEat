@@ -18,4 +18,4 @@ public class Spikes : MonoBehaviour
             playerObject.GetComponent<Rigidbody2D>().AddForce(Vector2.up * knockbackForce);
         }
     }
-} 
+}
