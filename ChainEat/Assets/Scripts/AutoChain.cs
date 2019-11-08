@@ -9,6 +9,7 @@ public class AutoChain : MonoBehaviour
     private ChainObject co;
     private Rigidbody2D rb;
     private HingeJoint2D hj;
+    private DistanceJoint2D dj;
     private Transform tr;
     private SpriteRenderer sr;
     private int knots;
@@ -20,6 +21,7 @@ public class AutoChain : MonoBehaviour
 
         rb = GetComponent<Rigidbody2D>();
         hj = GetComponent<HingeJoint2D>();
+        dj = GetComponent<DistanceJoint2D>();
         tr = GetComponent<Transform>();
         sr = GetComponent<SpriteRenderer>();
         co = GetComponent<ChainObject>();
@@ -30,14 +32,20 @@ public class AutoChain : MonoBehaviour
 
         if (knots > 0)
         {
-            print(knots + " knots");
+
             knots--;
             var child = Instantiate(chainPrefab, tr);
             child.GetComponent<Rigidbody2D>().gravityScale = 0f;
             child.GetComponent<AutoChain>().SetOffset(offsetPosition);
             child.GetComponent<AutoChain>().SetKnot(knots);
             child.GetComponent<AutoChain>().PassHook(hook);
-            child.GetComponent<HingeJoint2D>().connectedBody = rb;
+            //var anchorPoint = child.GetComponent<Transform>().position - tr.position;
+            //child.GetComponent<HingeJoint2D>().connectedAnchor = anchorPoint ;
+            //child.GetComponent<HingeJoint2D>().connectedBody = rb;
+            //child.GetComponent<HingeJoint2D>().enabled = true;/*
+            child.GetComponent<DistanceJoint2D>().connectedBody = rb;
+            child.GetComponent<DistanceJoint2D>().distance = 0.5f;
+            child.GetComponent<DistanceJoint2D>().enabled = true;
             child.GetComponent<SpriteRenderer>().enabled = true;
             child.GetComponent<Transform>().transform.position = tr.position + offsetPosition;
             child.GetComponent<AutoChain>().BootUp();
@@ -73,7 +81,19 @@ public class AutoChain : MonoBehaviour
         offsetPosition = offset;
     }
 
-    protected void Kill()
+    public void UpdatePosition()
+    {
+
+        if (knots != 0)
+        {
+            var child = transform.GetChild(0);
+            rb.position = child.transform.position;
+            dj.distance = Vector2.Distance (transform.position, child.transform.position);
+            child.GetComponent<AutoChain>().UpdatePosition();
+        }
+    }
+
+    public void Kill()
     {
         foreach (Transform child in transform)
         {

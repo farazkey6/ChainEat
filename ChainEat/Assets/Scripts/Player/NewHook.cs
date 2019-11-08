@@ -7,6 +7,7 @@ public class NewHook : MonoBehaviour
 {
     public GameObject anchorPoint;
     public GameObject chainPrefab;
+    private GameObject chainHandle;
     private Rigidbody2D anchorRB;
     private SpriteRenderer anchorSprite;
 
@@ -22,10 +23,8 @@ public class NewHook : MonoBehaviour
     public LayerMask chainLayerMask; //Which layers the chain reacts to(Must add each in unity)
     public float chainLength;
     private List<Vector2> chainPositions = new List<Vector2>();
-    private bool canHook;
     private float chainPieceSize;
     public HingeJoint2D jointAnchor;
-    private HingeJoint2D[] chainJoints;
     
     void Awake()
     {
@@ -34,7 +33,6 @@ public class NewHook : MonoBehaviour
         playerPosition = transform.position;
         anchorRB = anchorPoint.GetComponent<Rigidbody2D>();
         anchorSprite = anchorPoint.GetComponent<SpriteRenderer>();
-        //chainRenderer = playerController.GetComponent<LineRenderer>();
     }
 
     // Start is called before the first frame update
@@ -49,7 +47,7 @@ public class NewHook : MonoBehaviour
 
         Vector2 aimDirection = TakeAim();
         HandleInput(aimDirection);
-        //UpdateChain();
+        UpdateChain();
     }
 
     private void SetTargetPosition(float aimAngle)
@@ -74,7 +72,7 @@ public class NewHook : MonoBehaviour
             if (isChained) return;
 
             var hit = Physics2D.Raycast(playerPosition, aimDirection, chainLength, chainLayerMask);
-
+            chainHandle = Instantiate(chainPrefab);
 
             if (hit.collider != null)
             {
@@ -83,23 +81,24 @@ public class NewHook : MonoBehaviour
                 {
                     
                     playerJoint.distance = Vector2.Distance(playerPosition, hit.point);
-                    var chainHandle = Instantiate(chainPrefab);
                     chainHandle.GetComponent<Rigidbody2D>().gravityScale = 0f;
                     var trueSize = chainHandle.GetComponent<AutoChain>().GetTrueSize();
                     chainPieceSize = trueSize;
-                    chainPieceSize = 0.1f;
+                    chainPieceSize = 0.5f;
                     int chainKnots = (int)(playerJoint.distance / chainPieceSize);
                     Vector3 offsetPos = new Vector3(chainPieceSize * aimDirection.x, chainPieceSize * aimDirection.y, 0);
                     chainHandle.GetComponent<AutoChain>().SetOffset(offsetPos);
                     chainHandle.GetComponent<AutoChain>().SetKnot(chainKnots);
                     chainHandle.GetComponent<AutoChain>().PassHook(hit.rigidbody);
-                    chainHandle.GetComponent<HingeJoint2D>().connectedBody = anchorRB;
+                    //chainHandle.GetComponent<HingeJoint2D>().connectedBody = anchorRB;
+                   // chainHandle.GetComponent<HingeJoint2D>().enabled = true;
+                    chainHandle.GetComponent<DistanceJoint2D>().connectedBody = anchorRB;
+                    chainHandle.GetComponent<DistanceJoint2D>().enabled = true;
                     chainHandle.GetComponent<Transform>().transform.position = GetComponent<Transform>().position + offsetPos;
                     chainHandle.GetComponent<AutoChain>().BootUp();
-                     
+                    
                     anchorSprite.enabled = true;
                     playerJoint.enabled = true;
-                    print(offsetPos + "/" + transform.position);
                 }
             }
 
@@ -108,13 +107,15 @@ public class NewHook : MonoBehaviour
                 
                 isChained = false;
                 playerJoint.enabled = false;
+
+                GameObject[] gos = GameObject.FindGameObjectsWithTag("Chain");
+                foreach(GameObject go in gos)
+                    Destroy(go);
             }
         }
-        else if (!Input.GetMouseButton(0))
+        else if (!Input.GetMouseButton(0) && isChained)
         {
-
-            playerJoint.enabled = false;
-            //ResetHook();
+            DestroyChain(chainHandle);
         }
     }
 
@@ -144,5 +145,33 @@ public class NewHook : MonoBehaviour
         }
 
         return aimDirection;
+    }
+
+    private void UpdateChain()
+    {
+
+        if (!isChained)
+            return;
+
+
+        anchorRB.transform.position = chainHandle.transform.position;
+        playerJoint.distance = Vector2.Distance(transform.position, chainHandle.transform.position);
+
+        var child = transform.GetChild(0);
+        chainHandle.GetComponent<Rigidbody2D>().position = child.transform.position;
+        chainHandle.GetComponent<DistanceJoint2D>().distance = Vector2.Distance(transform.position, child.transform.position);
+        chainHandle.GetComponent<AutoChain>().UpdatePosition();
+    }
+
+    private void DestroyChain(GameObject chain)
+    {
+
+        isChained = false;
+        playerJoint.enabled = false;
+        playerController.isSwinging = false;
+        anchorSprite.enabled = false;
+        chainPositions.Clear();
+        chain.GetComponent<AutoChain>().Kill();
+        Destroy(chain);
     }
 }

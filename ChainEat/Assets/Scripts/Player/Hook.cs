@@ -10,7 +10,7 @@ public class Hook : MonoBehaviour
     private Rigidbody2D anchorRB;
     private SpriteRenderer anchorSprite;
 
-    public DistanceJoint2D playerJoint;
+    public SpringJoint2D playerJoint;
     public PlayerController playerController;
     private Vector2 playerPosition;
     private bool isChained;
@@ -31,6 +31,8 @@ public class Hook : MonoBehaviour
     {
         
         playerJoint.enabled = false;
+        playerJoint.frequency = 1;
+        playerJoint.dampingRatio = 0.005f;
         playerPosition = transform.position;
         anchorRB = anchorPoint.GetComponent<Rigidbody2D>();
         anchorSprite = anchorPoint.GetComponent<SpriteRenderer>();
@@ -166,7 +168,9 @@ public class Hook : MonoBehaviour
         {
             return;
         }
-        
+
+        playerJoint.distance *= 0.99f;
+
         //find the correct position
         chainRenderer.positionCount = chainPositions.Count + 1;
         
