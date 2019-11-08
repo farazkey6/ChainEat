@@ -8,8 +8,13 @@ public class Test : MonoBehaviour
     public float speed;
     public float jumpForce;
 
+
+    public GameObject head;
+    public GameObject leftArm;
+    public GameObject rightArm;
     public GameObject leftLeg;
     public GameObject rightLeg;
+
 
     public bool grounded;
     public bool canJump;
@@ -68,6 +73,11 @@ public class Test : MonoBehaviour
 
         canJump = false;
         grounded = false;
+    }
+
+    private void Grab()
+    {
+
     }
     
 
