@@ -287,9 +287,9 @@ MonoBehaviour:
   maxSpeed: 1
   c_Collider: {fileID: 6134576277972277639}
   p_Rigidbody: {fileID: 6134576277972277637}
-  jumpForce: 10
-  rock: {fileID: 0}
-  tempPos: {fileID: 0}
+  jumpForce: 20
+  rock: {fileID: 882677617821687574, guid: 18ae65bf79125af48a218de900966441, type: 3}
+  tempPos: {fileID: 6134576277972277643}
   isSwinging: 0
   hookSwing: {x: 0, y: 0}
   swingForce: 4

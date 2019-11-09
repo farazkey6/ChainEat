@@ -14,6 +14,7 @@ public class Hook : MonoBehaviour
     public PlayerController playerController;
     private Vector2 playerPosition;
     private bool isChained;
+    private float aimMemory;
 
     public Transform target;
     public SpriteRenderer targetSprite;
@@ -53,15 +54,15 @@ public class Hook : MonoBehaviour
         UpdateHook();
     }
 
-    private void SetTargetPosition(float aimAngle)
+    private void SetTargetPosition(float aimAngle, float distance)
     {
         if (!targetSprite.enabled)
         {
             targetSprite.enabled = true;
         }
 
-        var x = transform.position.x + 1f * Mathf.Cos(aimAngle);
-        var y = transform.position.y + 1f * Mathf.Sin(aimAngle);
+        var x = transform.position.x + distance * Mathf.Cos(aimAngle);
+        var y = transform.position.y + distance * Mathf.Sin(aimAngle);
 
         var targetPosition = new Vector3(x, y, 0);
         target.transform.position = targetPosition;
@@ -85,7 +86,12 @@ public class Hook : MonoBehaviour
                 {
 
                     //Jump slightly after successful hook(or not lol)
-                    transform.GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, 0f), ForceMode2D.Impulse);
+                    //transform.GetComponent<Rigidbody2D>().AddForce(new Vector2(0f, 0f), ForceMode2D.Impulse);
+
+                    //grappling hook force
+                    Vector2 redline = hit.point - playerPosition;
+                    aimMemory = Mathf.Atan2(redline.y, redline.x);
+
                     chainPositions.Add(hit.point);
                     playerJoint.distance = Vector2.Distance(playerPosition, hit.point);
                     playerJoint.enabled = true;
@@ -124,7 +130,9 @@ public class Hook : MonoBehaviour
 
         if (!isChained)
         {
-            SetTargetPosition(aimAngle);
+            var reddot = Physics2D.Raycast(playerPosition, aimDirection, chainLength, chainLayerMask);
+            var updatedDistance = Vector2.Distance (reddot.point, playerPosition);
+            SetTargetPosition(aimAngle, updatedDistance);
         }
         else
         {
@@ -169,7 +177,20 @@ public class Hook : MonoBehaviour
             return;
         }
 
-        playerJoint.distance *= 0.99f;
+        //hook grappling force
+        if (aimMemory * Mathf.Rad2Deg > 45 && aimMemory * Mathf.Rad2Deg < 135)
+        {
+            playerJoint.distance *= 0.99f;
+        }else if (aimMemory * Mathf.Rad2Deg > 225 && aimMemory * Mathf.Rad2Deg < 315)
+        {
+
+            playerJoint.distance *= 0.5f;
+        }
+        else
+        {
+
+            playerJoint.distance *= 0.9f;
+        }
 
         //find the correct position
         chainRenderer.positionCount = chainPositions.Count + 1;
