@@ -25,8 +25,8 @@ public class Hook : MonoBehaviour
     private List<Vector2> chainPositions = new List<Vector2>();
     private bool canHook;
 
-    //new positions for sticky hook
-    //private Dictionary<Vector2, int> wrapPointsLookup = new Dictionary<Vector2, int>();
+    //physical hook
+    private Dictionary<Vector2, int> wrapPointsLookup = new Dictionary<Vector2, int>();
     
     void Awake()
     {
@@ -52,6 +52,7 @@ public class Hook : MonoBehaviour
         Vector2 aimDirection = TakeAim();
         HandleInput(aimDirection);
         UpdateHook();
+        HandleRopeUnwrap();
     }
 
     private void SetTargetPosition(float aimAngle, float distance)
@@ -138,8 +139,8 @@ public class Hook : MonoBehaviour
         {
             targetSprite.enabled = false;
 
-            //Hook sticks to other surfaces after initial connect
-            /*
+            //rope feels a bit more realistic
+            
             if (chainPositions.Count > 0)
             {
                 var lastRopePoint = chainPositions.Last();
@@ -163,7 +164,7 @@ public class Hook : MonoBehaviour
                     }
                 }
             }
-            */
+            
         }
 
         return aimDirection;
@@ -244,6 +245,70 @@ public class Hook : MonoBehaviour
         }
     }
 
+    private void HandleRopeUnwrap()
+    {
+
+        if (chainPositions.Count <= 1)
+        {
+            return;
+        }
+
+        var anchorIndex = chainPositions.Count - 2;
+        var hingeIndex = chainPositions.Count - 1;
+        var anchorPosition = chainPositions[anchorIndex];
+        var hingePosition = chainPositions[hingeIndex];
+        var hingeDir = hingePosition - anchorPosition;
+        var hingeAngle = Vector2.Angle(anchorPosition, hingeDir);
+        var playerDir = playerPosition - anchorPosition;
+        var playerAngle = Vector2.Angle(anchorPosition, playerDir);
+        
+        if (!wrapPointsLookup.ContainsKey(hingePosition))
+        {
+            Debug.LogError("We were not tracking hingePosition (" + hingePosition + ") in the look up dictionary.");
+            return;
+        }
+
+        if (playerAngle < hingeAngle)
+        {
+            if (wrapPointsLookup[hingePosition] == 1)
+            {
+                UnwrapRopePosition(anchorIndex, hingeIndex);
+                return;
+            }
+
+            wrapPointsLookup[hingePosition] = -1;
+        }
+        else
+        {
+            if (wrapPointsLookup[hingePosition] == -1)
+            {
+                UnwrapRopePosition(anchorIndex, hingeIndex);
+                return;
+            }
+            
+            wrapPointsLookup[hingePosition] = 1;
+        }
+    }
+
+    private void UnwrapRopePosition(int anchorIndex, int hingeIndex)
+    {
+
+        var newAnchorPosition = chainPositions[anchorIndex];
+        wrapPointsLookup.Remove(chainPositions[hingeIndex]);
+        chainPositions.RemoveAt(hingeIndex);
+        
+        anchorRB.transform.position = newAnchorPosition;
+        canHook = false;
+
+        // Set new rope distance joint distance for anchor position if not yet set.
+        if (canHook)
+        {
+            return;
+        }
+        playerJoint.distance = Vector2.Distance(transform.position, newAnchorPosition);
+        canHook = true;
+    }
+
     private void ResetHook()
     {
         playerJoint.enabled = false;
@@ -254,7 +319,7 @@ public class Hook : MonoBehaviour
         chainRenderer.SetPosition(1, transform.position);
         chainPositions.Clear();
         anchorSprite.enabled = false;
-        //wrapPointsLookup.Clear();
+        wrapPointsLookup.Clear();
     }
 
     private Vector2 GetClosestColliderPointFromRaycastHit(RaycastHit2D hit, PolygonCollider2D polyCollider)

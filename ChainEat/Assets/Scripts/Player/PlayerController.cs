@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour
     //Jump variables
     bool jump = false;
     float fallModifier = 5f;
-    float jumpModifier = 2f;
+    float jumpModifier = 4f;
     bool grounded = false;
     public float jumpForce;
 
